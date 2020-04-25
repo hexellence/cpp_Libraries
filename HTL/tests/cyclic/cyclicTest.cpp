@@ -40,16 +40,16 @@ void runTestPrintResult(string testName, string Result) {
     cout.width(55);
     cout << testName << flush;
     cout << Result << endl;
-    failCount = (Result == "Pass") ? failCount : failCount++;
+    failCount = (Result == "Pass") ? failCount : (failCount + 1);
 }
 
-void runTestPrintResult(string testName, bool Result) {
+void runTestPrintResult(string testName, bool isPass) {
     cout.fill('.');
     cout.setf(ios::left);
     cout.width(55);
     cout << testName << flush;
-    cout << (Result ? "Pass" : "Fail") << endl;
-    failCount = Result ? failCount : failCount++;
+    cout << (isPass ? "Pass" : "Fail") << endl;
+    failCount = isPass ? failCount : (failCount + 1);
 }
 
 
@@ -124,7 +124,8 @@ int main()
     runTestPrintResult("check pull", ringStr.pull() == "n");
     runTestPrintResult("check pull", ringStr.pull() == "o");
     runTestPrintResult("Size reach 0 after pull", ringStr.size() == 0);
-    cout << failCount << " Failed tests" << endl;
-
-
+    ringStr.pull();
+    runTestPrintResult("pull when buffer empty", ringStr.size() == 1);
+    
+    cout << failCount << " Failed test(s)" << endl;
 }
