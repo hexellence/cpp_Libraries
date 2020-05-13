@@ -44,7 +44,8 @@ namespace hxl {
 		const hxlstr& operator=(const hxlstr& other);
 		const hxlstr& operator=(const char* str);
 		const hxlstr& operator=(const char16_t* str);
-
+		
+				
 		const char* c_str() const;
 		int size() const;
 		int rtrim(const char16_t* chars = u" \t");
@@ -54,7 +55,9 @@ namespace hxl {
 
 		friend std::ostream& operator<<(std::ostream& out, const hxlstr& obj);
 		friend bool operator==(const hxlstr& obj1, const hxlstr& obj2);
+		friend hxlstr operator+(const hxlstr& obj1, const hxlstr& obj2);
 		friend bool operator!=(const hxlstr& obj1, const hxlstr& obj2);
+		friend void hxlstrcopy(char* dest, hxlstr source);
 
 
 	};

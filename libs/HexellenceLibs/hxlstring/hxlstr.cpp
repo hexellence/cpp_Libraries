@@ -247,5 +247,23 @@ namespace hxl {
 		return retVal;
 	}
 
+	hxlstr operator+(const hxlstr& obj1, const hxlstr& obj2) {
+		
+		int size = obj1.m_size + obj2.m_size;
+		char* text = new char[size + 2];
+		memcpy(text, obj1.m_text, obj1.m_size);
+		memcpy(&text[obj1.m_size], obj2.m_text, obj2.m_size);
+		text[size] = '\0';
+		text[size + 1] = '\0';
+		hxlstr retVal((char16_t*)text);
+		return retVal;
+	}
+
+
+	void hxlstrcopy(char* dest, hxlstr source) {
+		
+		convert_char16_to_char((uint8_t*)source.c_str(), source.size(), (uint8_t*)dest);		
+	}
+
 
 }//namespace hxl

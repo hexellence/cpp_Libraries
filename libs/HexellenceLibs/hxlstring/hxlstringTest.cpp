@@ -87,7 +87,9 @@ int main()
 	if (test1 != test2) {
 		cout << test1 << " is not equal to " << test6 << endl;
 	}
-	
+
+	hxlstr test12 = test1 + test2;
+	cout << test12 << endl;
 
     std::cout << "Hello World!\n";
 }
