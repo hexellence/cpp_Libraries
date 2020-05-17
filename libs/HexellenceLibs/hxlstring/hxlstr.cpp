@@ -2,9 +2,10 @@
 #include "hxlstr.h"
 #include "trim.h"
 
-namespace hxl {
+namespace hxl {	
 
 	int convert_char_to_char16(const uint8_t* in, int size, uint8_t* out) {
+		//does not convert termination chars
 		for (int i = 0; i < size; ++i) {
 			out[i * 2] = in[i];
 			out[(i * 2) + 1] = '\0';
@@ -14,6 +15,7 @@ namespace hxl {
 
 
 	int convert_char16_to_char(const uint8_t* in, int size, uint8_t* out) {
+		//does not convert termination chars
 		for (int i = 0; i < size; i = i + 2) {
 			out[i / 2] = in[i];
 		}
@@ -21,40 +23,33 @@ namespace hxl {
 	}
 
 
-	int hxlstr::getSize(const char* str) {
-		int len = 0;
 
-		if (str != nullptr) {
-			while (str[len] != '\0') {
-				len++;
-			}
-		}
-		return len;
+
+	int hxlstr::getSize(const char* str) 
+	{
+		return length(str);
 	}
 
 
-	int hxlstr::getSize(const char16_t* str) {
-		int len = 0;
-		if (str != nullptr) {
-			while (str[len] != u'\0') {
-				len++;
-			}
-		}
-		return len * 2;
+	int hxlstr::getSize(const char16_t* str) 
+	{
+		return length(str) * 2;
 	}
 
+	//default constructor
+	hxlstr::hxlstr() {}
 
-	hxlstr::hxlstr() : m_text(nullptr), m_size(0) {}
 
+	//constructor that constructs from a memory area
+	hxlstr::hxlstr(const uint8_t* init, int size, ENC enc) {
 
-	hxlstr::hxlstr(const uint8_t* init, int size, ENC enc) : m_text(nullptr), m_size(0) {
-
-		if ((init != nullptr) && (size > 0)) {
+		if ((init != nullptr) && (size > 0)) {			
 			switch (enc) {
 			case ENC::ASCII:
 				m_size = 2 * size;
 				m_text = new char[m_size + 2];
-				m_ptr = (const char16_t*)m_text;
+				m_temp = new char[m_size + 2];
+				m_pchar16 = (const char16_t*)m_text;
 				convert_char_to_char16(init, size, (uint8_t*)m_text);
 				m_text[m_size] = '\0';
 				m_text[m_size + 1] = '\0';
@@ -62,7 +57,8 @@ namespace hxl {
 			case ENC::UTF16LE:
 				m_size = size;
 				m_text = new char[m_size + 2];
-				m_ptr = (const char16_t*)m_text;
+				m_temp = new char[m_size + 2];
+				m_pchar16 = (const char16_t*)m_text;
 				memcpy(m_text, init, m_size);
 				m_text[m_size] = '\0';
 				m_text[m_size + 1] = '\0';
@@ -77,21 +73,7 @@ namespace hxl {
 	}
 
 
-	hxlstr::hxlstr(const char* init) : m_text(nullptr), m_size(0) {
-		//we expect to find a terminator here
-		if (init != nullptr) {
-			int size = getSize(init);
-			m_size = 2 * size;
-			m_text = new char[m_size + 2];
-			m_ptr = (const char16_t*)m_text;
-			convert_char_to_char16((const uint8_t*)init, size, (uint8_t*)m_text);
-			m_text[m_size] = '\0';
-			m_text[m_size + 1] = '\0';
-		}
-		else {
-			std::cout << "illegal parameters" << std::endl;
-		}
-	}
+	hxlstr::hxlstr(const char* init) : hxlstr((const uint8_t*)init, getSize(init), ENC::ASCII) { }
 
 
 	hxlstr::hxlstr(char init, int size) {
@@ -99,32 +81,20 @@ namespace hxl {
 		//fill the array
 		for (int i = 0; i < size; ++i) {
 			tempInit[i] = init;
-		}
-
-		m_size = 2 * size;
-		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
-		convert_char_to_char16((const uint8_t*)tempInit, size, (uint8_t*)m_text);
+		}		
+		this->hxlstr::hxlstr((const uint8_t*)tempInit, size, ENC::ASCII);
 		delete[] tempInit;
-		m_text[m_size] = '\0';
-		m_text[m_size + 1] = '\0';
 	}
 
 
-	hxlstr::hxlstr(const char16_t* init) : m_text(nullptr), m_size(0) {
-		//we expect a terminator here
-		if (init != nullptr) {
-			m_size = getSize(init);
-			m_text = new char[m_size + 2];	//len didn't include terminators
-			m_ptr = (const char16_t*)m_text;
-			memcpy(m_text, (const char*)init, m_size + 2);		//since the original value has two buye termination copy size will include that too
-		}
-	}
+	hxlstr::hxlstr(const char16_t* init) : hxlstr((const uint8_t*)init, getSize(init), ENC::UTF16LE) { }
 
+	// copy constructor
 	hxlstr::hxlstr(const hxlstr& other) {
 		m_size = other.m_size;
 		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
+		m_pchar16 = (const char16_t*)m_text;
+		m_enc = other.m_enc;
 		memcpy(m_text, other.m_text, m_size + 2);
 	}
 
@@ -133,19 +103,14 @@ namespace hxl {
 		char temp[12]{};
 		sprintf_s(temp, "%d", number);
 		len = getSize(temp);
-		m_size = 2 * len;
-		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
-		convert_char_to_char16((uint8_t*)temp, len, (uint8_t*)m_text);
-		m_text[m_size] = '\0';
-		m_text[m_size + 1] = '\0';
+		this->hxlstr::hxlstr((const uint8_t*)temp, len, ENC::ASCII);
 	}
 
 	const hxlstr& hxlstr::operator=(const hxlstr& other) {
 		delete[] m_text;
 		m_size = other.m_size;
 		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
+		m_pchar16 = (const char16_t*)m_text;
 		memcpy(m_text, other.m_text, m_size + 2);
 		return *this;
 	}
@@ -156,7 +121,7 @@ namespace hxl {
 		int sourceSize = getSize(str);
 		m_size = sourceSize * 2;
 		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
+		m_pchar16 = (const char16_t*)m_text;
 		convert_char_to_char16((const uint8_t*)str, sourceSize, (uint8_t*)m_text);
 		m_text[m_size] = '\0';
 		m_text[m_size + 1] = '\0';
@@ -169,19 +134,30 @@ namespace hxl {
 		int sourceSize = getSize(str);
 		m_size = sourceSize;
 		m_text = new char[m_size + 2];
-		m_ptr = (const char16_t*)m_text;
+		m_pchar16 = (const char16_t*)m_text;
 		memcpy(m_text, (const char*)str, m_size + 2);
 		return *this;
 	}
 
-
 	hxlstr::~hxlstr() {
 		delete[] m_text;
+		delete[] m_temp;
 	}
 
+	const char* hxlstr::raw() const {
+		
+		return m_text;
+	}
 
 	const char* hxlstr::c_str() const {
-		return m_text;
+		memset(m_temp, 0, m_size + 2);
+		convert_char16_to_char((const uint8_t*)m_text, m_size, (uint8_t*)m_temp);
+		return m_temp;
+	}
+
+	const char16_t* hxlstr::c16_str() const {
+
+		return (const char16_t*)m_text;
 	}
 
 
@@ -209,6 +185,11 @@ namespace hxl {
 		m_size = trim_both((char16_t*)m_text, m_size / 2, chars);
 		m_size = m_size * 2;
 		return m_size;
+	}
+
+	void hxlstr::remove(const char16_t chars) {
+
+		replace_char((char16_t*)m_text, m_size / 2, chars);
 	}
 
 	//Fiends
@@ -260,10 +241,17 @@ namespace hxl {
 	}
 
 
-	void hxlstrcopy(char* dest, hxlstr source) {
-		
-		convert_char16_to_char((uint8_t*)source.c_str(), source.size(), (uint8_t*)dest);		
+	void hxlstrcopy(char* dest, hxlstr source, int destSizelimit) {
+		int size = source.size();	//this size is for char16 representation
+		//so limit is given in bytes
+		if (destSizelimit > 0)
+		{
+			if (destSizelimit < (size / 2))
+			{
+				size = destSizelimit * 2;
+			}
+		}
+		convert_char16_to_char((uint8_t*)source.c_str(), size, (uint8_t*)dest);
 	}
-
 
 }//namespace hxl

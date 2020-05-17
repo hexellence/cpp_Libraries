@@ -13,6 +13,13 @@ int main()
 
 	uint8_t memorySim[150];
 
+	memorySim[30] = 'T';
+	memorySim[31] = 'T';
+	memorySim[32] = 'T';
+	memorySim[33] = 'T';
+	memorySim[34] = 'T';
+
+
 	//hxlstr();
 	hxlstr test1;
 	cout << "test1: " << test1 << endl;
@@ -25,7 +32,9 @@ int main()
 	cout << "test3: " << test3 << endl;
 
 	//hxlstr(const uint8_t * init, int size, ENC enc);
-	hxlstr test4(&memorySim[5], 5, hxlstr::ENC::ASCII);
+	hxlstr test4(&memorySim[30], 5, hxlstr::ENC::ASCII);
+	cout << "test4: " << test4 << endl;
+	cout << "test4: " << test4.c_str() << endl;
 	cout << "test4: " << test4 << endl;
 
 	//hxlstr(const hxlstr & other);
