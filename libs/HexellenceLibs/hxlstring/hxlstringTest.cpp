@@ -15,7 +15,7 @@ int main()
 
 	memorySim[30] = 'T';
 	memorySim[31] = 'T';
-	memorySim[32] = 'T';
+	memorySim[32] = '$';
 	memorySim[33] = 'T';
 	memorySim[34] = 'T';
 
@@ -36,6 +36,10 @@ int main()
 	cout << "test4: " << test4 << endl;
 	cout << "test4: " << test4.c_str() << endl;
 	cout << "test4: " << test4 << endl;
+
+	//drop $
+	test4.drop('$');
+	cout << "test4 after dropping $: " << test4 << endl;
 
 	//hxlstr(const hxlstr & other);
 	hxlstr test5 = test2;
@@ -99,6 +103,28 @@ int main()
 
 	hxlstr test12 = test1 + test2;
 	cout << test12 << endl;
+
+
+
+	/*		
+		const uint8_t* raw() const;
+		const char* c_str();
+		const char16_t* c16_str() const;		
+		int size() const;
+		int len() const;
+		ENC enc();
+		int rtrim();
+		int ltrim();
+		int trim();
+		void drop(const char16_t chars);
+		void drop(const char chars);
+		friend std::ostream& operator<<(std::ostream& out, const hxlstr& obj);
+		friend bool operator==(const hxlstr& obj1, const hxlstr& obj2);
+		friend hxlstr operator+(const hxlstr& obj1, const hxlstr& obj2);
+		friend bool operator!=(const hxlstr& obj1, const hxlstr& obj2);*/
+
+
+
 
     std::cout << "Hello World!\n";
 }
