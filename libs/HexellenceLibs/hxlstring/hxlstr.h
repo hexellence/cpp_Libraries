@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include "trim.h"
 
 namespace hxl {
 
@@ -12,24 +11,22 @@ namespace hxl {
 		enum class ENC {
 			NONE,
 			ASCII,
-			UTF16LE,
-			UTF16BE,
+			UNICD,			
 		};
 
 	private:
-		char* m_text = nullptr;
 		char* m_temp = nullptr;
+		uint8_t* m_text = nullptr;
 		int m_size = 0;
 		ENC m_enc = ENC::NONE;		
-		const char16_t* m_pchar16 = nullptr;
-		
-		int getSize(const char* str);
-		int getSize(const char16_t* str);
+		static int convert_char_to_char16(const uint8_t* in, int size, uint8_t* out);
+		static int convert_char16_to_char(const uint8_t* in, int size, uint8_t* out);
 
 	public:			
 
 		hxlstr();
-		hxlstr(const uint8_t* init, int size, ENC enc);
+		hxlstr(const uint8_t* init, int size, ENC enc = ENC::ASCII);
+		hxlstr(const char* init, int size);
 		hxlstr(const char* init);
 		hxlstr(const char16_t* init);
 		hxlstr(const hxlstr& other);
@@ -42,24 +39,22 @@ namespace hxl {
 		const hxlstr& operator=(const char16_t* str);
 		
 				
-		const char* c_str() const;
-		const char16_t* c16_str() const;
-		const char* raw() const;
+		const char* c_str();
+		const char16_t* c16_str();		
 		int size() const;
-		int rtrim(const char16_t* chars = u" \t");
-		int ltrim(const char16_t* chars = u" \t");
-		int trim(const char16_t* chars = u" \t");
+		int len() const;
+		ENC enc();
+		int rtrim();
+		int ltrim();
+		int trim();
 
-		void remove(const char16_t chars);
-
+		void drop(const char16_t chars);
+		void drop(const char chars);
 
 		friend std::ostream& operator<<(std::ostream& out, const hxlstr& obj);
 		friend bool operator==(const hxlstr& obj1, const hxlstr& obj2);
 		friend hxlstr operator+(const hxlstr& obj1, const hxlstr& obj2);
 		friend bool operator!=(const hxlstr& obj1, const hxlstr& obj2);
-		friend void hxlstrcopy(char* dest, hxlstr source, int destSizelimit = -1);
-
-
 	};
 }//namespace hxl
 
