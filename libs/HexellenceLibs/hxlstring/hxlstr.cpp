@@ -147,9 +147,14 @@ namespace hxl {
 		return m_temp;
 	}
 
-	const char16_t* hxlstr::c16_str()
+	const char16_t* hxlstr::c16_str() const
 	{
 		return (char16_t*)m_text;
+	}
+
+	const uint8_t* hxlstr::raw() const
+	{
+		return (const uint8_t*)m_text;
 	}
 
 

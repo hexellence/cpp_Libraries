@@ -38,9 +38,9 @@ namespace hxl {
 		const hxlstr& operator=(const char* str);
 		const hxlstr& operator=(const char16_t* str);
 		
-				
+		const uint8_t* raw() const;
 		const char* c_str();
-		const char16_t* c16_str();		
+		const char16_t* c16_str() const;		
 		int size() const;
 		int len() const;
 		ENC enc();
