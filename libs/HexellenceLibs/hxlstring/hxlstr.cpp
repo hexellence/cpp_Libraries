@@ -4,12 +4,13 @@
 
 namespace hxl {
 
-	//default constructor
-	hxlstr::hxlstr() : hxlstr("") { }
-
-
 	//constructor that constructs from a memory area
-	hxlstr::hxlstr(const uint8_t* init, int size, ENC enc) : m_temp(nullptr), m_text(nullptr), m_size(0), m_enc(ENC::NONE) {
+	void hxlstr::initialise(const uint8_t* init, int size, ENC enc)
+	{
+		m_temp = nullptr;
+		m_text = nullptr;
+		m_size = 0;
+		m_enc = ENC::NONE;
 
 		if (init != nullptr) {
 			if (enc == ENC::UNICD)
@@ -38,19 +39,29 @@ namespace hxl {
 		m_text2 = (char16_t*)m_text;
 	}
 
+	//default constructor
+	hxlstr::hxlstr() : hxlstr("") { }
+
+
+	//constructor that constructs from a memory area
+	hxlstr::hxlstr(const uint8_t* init, int size, ENC enc) {
+
+		initialise(init, size, enc);
+	}
+
 	hxlstr::hxlstr(const char* init, int size) : hxlstr((const uint8_t*)init, size) { }
 
 
 	hxlstr::hxlstr(const char* init) : hxlstr((const uint8_t*)init, bytes(init)) { }
 
 
-	hxlstr::hxlstr(char init, int size) : m_temp(nullptr), m_text(nullptr), m_size(0), m_enc(ENC::NONE) {
+	hxlstr::hxlstr(char init, int size){
 		char* tempInit = new char[size];
 		//fill the array
 		for (int i = 0; i < size; ++i) {
 			tempInit[i] = init;
 		}
-		hxlstr::hxlstr((const uint8_t*)tempInit, size);
+		initialise((const uint8_t*)tempInit, size);
 		delete[] tempInit;
 	}
 
@@ -74,7 +85,7 @@ namespace hxl {
 		char temp[12]{};
 		sprintf_s(temp, "%d", number);
 		size = bytes(temp);
-		hxlstr::hxlstr((const uint8_t*)temp, size);
+		initialise((const uint8_t*)temp, size);
 	}
 
 	//assignment operator
@@ -89,7 +100,7 @@ namespace hxl {
 			m_enc = other.m_enc;
 			m_text = new uint8_t[m_size + 2];
 			m_text2 = (char16_t*)m_text;
-			memcpy(m_text, other.m_text, m_size + 2);			
+			memcpy(m_text, other.m_text, m_size + 2);
 		}
 		else
 		{
@@ -226,6 +237,12 @@ namespace hxl {
 		return len();
 	}
 
+	int hxlstr::trim(hxlstr chars) {
+		m_size = 2 * trim_both((char16_t*)m_text, len(), chars.c16_str());
+
+		return len();
+	}
+
 	void hxlstr::drop(const char16_t chars) {
 
 		replace_char((char16_t*)m_text, len(), chars);
@@ -256,11 +273,10 @@ namespace hxl {
 
 	bool operator==(const hxlstr& obj1, const hxlstr& obj2) {
 		bool retVal = false;
-		if (obj1.m_enc == obj2.m_enc) {
-			if (obj1.m_size == obj2.m_size) {
-				retVal = memcmp(obj1.m_text, obj2.m_text, obj1.m_size) == 0;
-			}//compare len
-		}//compare enc	
+		if (obj1.m_size == obj2.m_size) {
+			retVal = memcmp(obj1.m_text, obj2.m_text, obj1.m_size) == 0;
+		}//compare len
+
 		return retVal;
 	}
 
@@ -268,6 +284,27 @@ namespace hxl {
 	bool operator!=(const hxlstr& obj1, const hxlstr& obj2) {
 
 		bool retVal = !(obj1 == obj2);
+		return retVal;
+	}
+
+	bool hxlstr::operator<(const hxlstr& other) const 
+	{
+		char* str1 = new char[m_size / 2 + 1];
+		char* str2 = new char[other.m_size / 2 + 1];
+
+		convert_char16_to_char(m_text, m_size, (uint8_t*)str1);
+		convert_char16_to_char(other.m_text, other.m_size, (uint8_t*)str2);
+		str1[m_size / 2] = '\0';
+		str2[other.m_size / 2] = '\0';
+
+		bool retVal = false;
+		int compare = strcmp(str1, str2);
+		if (compare < 0)
+		{
+			retVal = true;
+		}		
+		delete[] str1;
+		delete[] str2;
 		return retVal;
 	}
 

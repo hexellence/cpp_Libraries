@@ -104,6 +104,8 @@ int main()
 	hxlstr test12 = test1 + test2;
 	cout << test12 << endl;
 
+	cout << (test1 < test2) << endl;
+	cout << (test2 < test1) << endl;
 
 
 	/*		

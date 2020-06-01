@@ -20,7 +20,8 @@ namespace hxl {
 		char16_t* m_text2;
 		int m_size;
 		ENC m_enc;		
-
+		
+		void initialise(const uint8_t* init, int size, ENC enc = ENC::ASCII);
 		static int convert_char_to_char16(const uint8_t* in, int size, uint8_t* out);
 		static int convert_char16_to_char(const uint8_t* in, int size, uint8_t* out);
 
@@ -38,7 +39,7 @@ namespace hxl {
 
 		const hxlstr& operator=(const hxlstr& other);
 		const hxlstr& operator=(const char* str);
-		const hxlstr& operator=(const char16_t* str);		
+		const hxlstr& operator=(const char16_t* str);				
 		const uint8_t* raw() const;
 		const char* c_str();
 		const char16_t* c16_str() const;		
@@ -48,10 +49,12 @@ namespace hxl {
 		int rtrim();
 		int ltrim();
 		int trim();
+		int trim(hxlstr chars);
 		void drop(const char16_t chars);
 		void drop(const char chars);
 		friend std::ostream& operator<<(std::ostream& out, const hxlstr& obj);
 		friend bool operator==(const hxlstr& obj1, const hxlstr& obj2);
+		bool operator<(const hxlstr& other) const;
 		friend hxlstr operator+(const hxlstr& obj1, const hxlstr& obj2);
 		friend bool operator!=(const hxlstr& obj1, const hxlstr& obj2);
 	};

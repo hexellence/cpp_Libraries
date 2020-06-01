@@ -16,6 +16,24 @@ namespace hxl {
 		return retVal;
 	}
 
+	template<class T>
+	int replace_char(T* str, int length, const T chars)
+	{
+		//length is without the termination
+		for (int i = 0; i < length; i++) {
+			//check each char starting at the end
+			if (str[i] == chars) {
+				if (typeid(T) == typeid(char)) {
+					str[i] = ' ';
+				}
+				else if (typeid(T) == typeid(char16_t)) {
+					str[i] = u' ';
+				}	
+			}
+		}
+		return length;
+	}
+
 
 	template<class T>
 	int trim_right(T* str, int length, const T* chars)
@@ -69,5 +87,29 @@ namespace hxl {
 		newLength = trim_left<T>(str, newLength, chars);
 		return newLength;
 	}
+
+	template<class T>
+	int length(T* str)
+	{
+		int len = 0;
+		if (str != nullptr)
+		{
+			T termChar{};	//assuming the defualt is also the term character
+			while (str[len] != termChar)
+			{
+				len++;
+			}
+		}
+		return len;
+	}
+
+
+	template<class T>
+	int bytes(T* str)
+	{
+		int len = length(str);
+		return len * sizeof(T);
+	}
+
 
 }//hxl namespace
